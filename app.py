@@ -1,12 +1,16 @@
 from flask import Flask, render_template, Response, request, url_for, jsonify, redirect, session
 from flask_sqlalchemy import SQLAlchemy
+from dotenv import load_dotenv
 import json, os, requests
+
 
 # Obtén la ruta absoluta para la base de datos
 basedir = os.path.abspath(os.path.dirname(__file__))
 
+load_dotenv()
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(basedir, 'database', 'juegos_datos.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL') 
 app.config['SECRET_KEY'] = 'your_secret_key'
 db = SQLAlchemy()
 db.init_app(app)
@@ -103,4 +107,6 @@ def about():
     return 'About'
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
