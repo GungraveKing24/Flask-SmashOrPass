@@ -1,14 +1,13 @@
 from flask import Flask
-from config import config
+from config import Config
 from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import migrate
+from flask_migrate import Migrate
 import logging
 
 app = Flask(__name__)
-app.config.from_object(config)
-
+app.config.from_object(Config)
 db = SQLAlchemy(app)
-migrate = migrate(app, db)
+migrate = Migrate(app, db)
 
 from app import routes, models
 

@@ -3,7 +3,7 @@ from app import app, db
 from app.models import users, pokemon
 
 @app.route('/')
-def login():
+def home():
     return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
