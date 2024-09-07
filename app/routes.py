@@ -19,3 +19,8 @@ def login():
         else:
             return 'Invalid credentials', 401
     return render_template('login.html')
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
