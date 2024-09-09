@@ -8,7 +8,15 @@ def home():
 
 @app.route('/index')
 def index():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
     return render_template('index.html')
+
+@app.route('/smash_pass')
+def smash_pass():
+    if 'user_id' not in session:
+        return redirect(url_for('login'))
+    return render_template('smashpass.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
