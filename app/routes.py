@@ -19,15 +19,15 @@ def index():
 def smash_pass():
     if 'user_id' not in session:
         return redirect(url_for('login'))
+    
     return render_template('smashpass.html')
 
 @app.route('/savepokemon/<string:pokemon_name>/<int:pokemon_id>', methods=['POST'])
 def savepokemon(pokemon_name, pokemon_id):
     user_id = session.get('user_id')  # Obtenemos el ID del usuario desde la sesión
-
+    
     # Verificamos si el Pokémon ya ha sido registrado por este usuario
     existing_pokemon = pokemon.query.filter_by(pokemon=pokemon_name, id_user=user_id).first()
-
     if existing_pokemon:
         return jsonify({'message': f'Pokémon {pokemon_name} ya fue registrado por este usuario.'}), 400
 
@@ -43,16 +43,20 @@ def savepokemon(pokemon_name, pokemon_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+
     if request.method == 'POST':
         name = request.form['name']
         password = request.form['password']
         user = users.query.filter_by(name=name, password=password).first()
         if user:
+            session.permanent = True  # Esto asegura que la sesión dure el tiempo configurado
             session['user_id'] = user.id
             session['user_name'] = user.name
             return redirect(url_for('index'))
         else:
-            flash('Usuario o contraseña incorrectos')
+            flash('Usuario o contraseña incorrectos')
             return redirect(url_for('login'))
     return render_template('login.html')
 
