@@ -7,7 +7,10 @@ import logging
 
 app = Flask(__name__)
 app.config.from_object(Config)
-app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(hours=1)
+app.secret_key = ',aos844a/scña{scasñsaç.ñasasdci-{,añc,.c{ñasc'  # Cambia esto por una clave segura
+app.permanent_session_lifetime = timedelta(minutes=30)  # Establece la duración de la sesión
+app.config['SESSION_COOKIE_SAMESITE'] = 'None'  # Cambia a 'Lax' si solo necesitas seguridad en la misma pestaña
+app.config['SESSION_COOKIE_SECURE'] = True
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 

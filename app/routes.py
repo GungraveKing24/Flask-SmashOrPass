@@ -3,8 +3,15 @@ from app import app, db
 from app.models import users, pokemon
 import requests
 
+@app.before_request
+def log_session():
+    app.logger.info(f"Session Data: {session}")
+
 @app.route('/')
 def home():
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+
     return render_template('login.html')
 
 @app.route('/index')
