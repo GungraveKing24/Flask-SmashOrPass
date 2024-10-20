@@ -50,11 +50,34 @@
         input[type="submit"]:hover {
             background-color: #45a049;
         }
+        .flashes {
+            list-style: none;
+            padding: 0;
+        }
+        .flashes li {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+        }
     </style>
 </head>
 <body>
     <div class="login-container">
         <h2>Login</h2>
+
+        {% with messages = get_flashed_messages(with_categories=True) %}
+            {% if messages %}
+                <ul class="flashes">
+                {% for category, message in messages %}
+                    <li class="{{ category }}">{{ message }}</li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
         <form action="{{ url_for('login') }}" method="post">
             <label for="name">Username:</label>
             <input type="text" id="name" name="name" required>

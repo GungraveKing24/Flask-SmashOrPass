@@ -1,10 +1,10 @@
 <ul>
     <li><a href="{{ url_for('index') }}">Home</a></li>
     <!-- Añade más enlaces aquí -->
+    <li><a href="{{ url_for('smash_pass') }}">Smash or pass</a></li>
     <li>
         <form method="POST" action="{{ url_for('logout') }}">
             <button type="submit" class="btn btn-danger">Logout</button>
         </form>
     </li>
-    <li><a href="{{ url_for('smash_pass') }}">Index</a></li>
 </ul>

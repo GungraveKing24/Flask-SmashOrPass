@@ -1,4 +1,4 @@
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, request, redirect, url_for, flash, session, jsonify
 from app import app, db
 from app.models import users, pokemon
 import requests
@@ -11,7 +11,9 @@ def home():
 def index():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    return render_template('index.html')
+    
+    pokemones = pokemon.query.filter_by(id_user=session['user_id']).all()
+    return render_template('index.html', pokemones=pokemones)
 
 @app.route('/smash_pass')
 def smash_pass():
@@ -19,11 +21,25 @@ def smash_pass():
         return redirect(url_for('login'))
     return render_template('smashpass.html')
 
-@app.route('/get_pokemon', methods=['POST'])
-def get_pokemon():
-    url = 'https://pokeapi.co/api/v2/pokemon/'
-    if request.method == 'POST':
-        fetch = requests.get(url)
+@app.route('/savepokemon/<string:pokemon_name>/<int:pokemon_id>', methods=['POST'])
+def savepokemon(pokemon_name, pokemon_id):
+    user_id = session.get('user_id')  # Obtenemos el ID del usuario desde la sesión
+
+    # Verificamos si el Pokémon ya ha sido registrado por este usuario
+    existing_pokemon = pokemon.query.filter_by(pokemon=pokemon_name, id_user=user_id).first()
+
+    if existing_pokemon:
+        return jsonify({'message': f'Pokémon {pokemon_name} ya fue registrado por este usuario.'}), 400
+
+    # Si no existe, lo creamos y lo asociamos al usuario actual
+    new_pokemon = pokemon(pokemon=pokemon_name, pokemon_id=pokemon_id, id_user=user_id)
+    try:
+        db.session.add(new_pokemon)
+        db.session.commit()
+        return jsonify({'message': f'Pokémon {pokemon_name} registrado exitosamente.'}), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'message': 'Error al guardar Pokémon.'}), 500
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -36,7 +52,8 @@ def login():
             session['user_name'] = user.name
             return redirect(url_for('index'))
         else:
-            return 'Invalid credentials', 401
+            flash('Usuario o contraseña incorrectos')
+            return redirect(url_for('login'))
     return render_template('login.html')
 
 @app.route('/logout', methods=['POST'])
