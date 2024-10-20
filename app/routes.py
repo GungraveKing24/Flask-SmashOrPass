@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session
 from app import app, db
 from app.models import users, pokemon
+import requests
 
 @app.route('/')
 def home():
@@ -17,6 +18,12 @@ def smash_pass():
     if 'user_id' not in session:
         return redirect(url_for('login'))
     return render_template('smashpass.html')
+
+@app.route('/get_pokemon', methods=['POST'])
+def get_pokemon():
+    url = 'https://pokeapi.co/api/v2/pokemon/'
+    if request.method == 'POST':
+        fetch = requests.get(url)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
