@@ -77,7 +77,11 @@ def register():
         name = request.form['name']
         email = request.form['email']
         password = request.form['password']
-        user = users.query.filter_by(name=name, email=email).first()
+        try:
+            user = users.query.filter_by(name=name, email=email).first()
+        except Exception as e:
+            flash('Ocurrió un error al intentar acceder a la base de datos.')
+        
         if user:
             flash('El usuario ya existe')
             return redirect(url_for('register'))

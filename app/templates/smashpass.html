@@ -43,7 +43,7 @@
         {% include 'navbar.html' %}
     </nav>
 
-    <div class="bg-current rounded-lg shadow-2xl p-8 max-w-md w-full">
+    <div class="bg-current rounded-lg shadow-2xl p-5 max-w-md w-full">
         <h1 class="text-3xl font-bold text-center mb-1 text-red-600" style="font-family: 'Press Start 2P', cursive;">
             SMASH OR PASS
         </h1>
@@ -74,36 +74,79 @@
                 PASS
             </button>
         </div>
+
+        <div class="mt-2 flex justify-center">
+            <div class="inline-flex rounded-md shadow-sm" role="group">
+                <button id="prev" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border border-gray-900 rounded-s-lg hover:bg-gray-900 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700">
+                    Back
+                </button>
+                <button id="home" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border-t border-b border-gray-900 hover:bg-gray-900 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700">
+                    Start
+                </button>
+                <button id="next2" type="button" class="px-4 py-2 text-sm font-medium text-gray-900 bg-transparent border border-gray-900 rounded-e-lg hover:bg-gray-900 hover:text-white focus:z-10 focus:ring-2 focus:ring-gray-500 focus:bg-gray-900 focus:text-white dark:border-white dark:text-white dark:hover:text-white dark:hover:bg-gray-700 dark:focus:bg-gray-700">
+                    Next
+                </button>
+            </div>
+        </div>
     </div>
 
+    
     <script>
-        let currentPokemonId = localStorage.getItem('currentPokemonId') || 1;
-
+        let currentPokemonId = parseInt(localStorage.getItem('currentPokemonId')) || 1;
+    
         document.getElementById('smash').addEventListener('click', async function() {
             const pokemonName = document.getElementById('pokemonname').innerText; // Obtenemos el nombre del Pokémon
             await savePokemon(pokemonName); // Llamamos a la función con el nombre
-            currentPokemonId = parseInt(currentPokemonId) + 1;
+            currentPokemonId++;
             localStorage.setItem('currentPokemonId', currentPokemonId);
             fetchPokemon(currentPokemonId);
         });
-
+    
         document.getElementById('next').addEventListener('click', function() {
-            currentPokemonId = parseInt(currentPokemonId) + 1;
+            currentPokemonId++;
             localStorage.setItem('currentPokemonId', currentPokemonId);
             fetchPokemon(currentPokemonId);
         });
 
+        document.getElementById('next2').addEventListener('click', function() {
+            currentPokemonId++;
+            localStorage.setItem('currentPokemonId', currentPokemonId);
+            fetchPokemon(currentPokemonId);
+        });
+    
+        document.getElementById('prev').addEventListener('click', function() {
+            if (currentPokemonId > 1) {
+                currentPokemonId--;
+                localStorage.setItem('currentPokemonId', currentPokemonId);
+                fetchPokemon(currentPokemonId);
+            }
+        });
+    
+        document.getElementById('home').addEventListener('click', function() {
+            currentPokemonId = 1;
+            localStorage.setItem('currentPokemonId', currentPokemonId);
+            fetchPokemon(currentPokemonId);
+        });
+    
         function fetchPokemon(pokemonId) {
             fetch(`https://pokeapi.co/api/v2/pokemon/${pokemonId}`)
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Pokémon no encontrado');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     document.getElementById('pokemonname').innerText = data.name;
                     document.getElementById('pokemonimage').src = data.sprites.other['official-artwork'].front_default;
                     document.getElementById('pokemonimage').alt = data.name;
                 })
-                .catch(error => console.error('Error fetching Pokémon:', error)); // Manejo de errores
+                .catch(error => {
+                    console.error('Error fetching Pokémon:', error);
+                    alert('Pokémon no encontrado. Intenta con otro ID.');
+                }); // Manejo de errores
         }
-
+    
         async function savePokemon(pokemonName) {
             const response = await fetch(`/savepokemon/${pokemonName}/${currentPokemonId}`, { // Cambiado aquí
                 method: 'POST',
@@ -115,9 +158,8 @@
             const result = await response.json();
             alert(result.message);
         }
-
+    
         fetchPokemon(currentPokemonId);
-    </script>
-
+    </script>    
 </body>
 </html>
