@@ -1,6 +1,7 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify
 from app import app, db
 from app.models import users, pokemon
+from werkzeug.security import generate_password_hash, check_password_hash
 import requests
 
 @app.before_request
@@ -54,10 +55,10 @@ def login():
         return redirect(url_for('index'))
 
     if request.method == 'POST':
-        name = request.form['name']
+        email = request.form['email']
         password = request.form['password']
-        user = users.query.filter_by(name=name, password=password).first()
-        if user:
+        user = users.query.filter_by(email=email).first()
+        if user and check_password_hash(user.password, password):
             session.permanent = True  # Esto asegura que la sesión dure el tiempo configurado
             session['user_id'] = user.id
             session['user_name'] = user.name
@@ -66,6 +67,27 @@ def login():
             flash('Usuario o contraseña incorrectos')
             return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'user_id' in session:
+        return redirect(url_for('index'))
+
+    if request.method == 'POST':
+        name = request.form['name']
+        email = request.form['email']
+        password = request.form['password']
+        user = users.query.filter_by(name=name, email=email).first()
+        if user:
+            flash('El usuario ya existe')
+            return redirect(url_for('register'))
+        else:
+            hashed_password = generate_password_hash(password)
+            new_user = users(name=name, email=email, password=hashed_password)
+            db.session.add(new_user)
+            db.session.commit()
+            return redirect(url_for('login'))
+    return render_template('register.html')
 
 @app.route('/logout', methods=['POST'])
 def logout():
