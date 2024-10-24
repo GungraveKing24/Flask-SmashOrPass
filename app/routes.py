@@ -134,10 +134,11 @@ def register():
             flash('El usuario ya existe')
             return redirect(url_for('register'))
         else:
-            hashed_password = generate_password_hash(password)
-            new_user = users(name=name, email=email, password=hashed_password)
-            db.session.add(new_user)
-            db.session.commit()
+            flash('Registro desactivado permanentemente')
+            #hashed_password = generate_password_hash(password)
+            #new_user = users(name=name, email=email, password=hashed_password)
+            #db.session.add(new_user)
+            #db.session.commit()
             return redirect(url_for('login'))
     return render_template('register.html')
 
