@@ -4,7 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import timedelta
 from authlib.integrations.flask_client import OAuth
-import logging
+import logging, os
 
 app = Flask(__name__)
 app.config.from_object(Config)
