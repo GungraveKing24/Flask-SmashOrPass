@@ -64,6 +64,23 @@
             border: 1px solid #f5c6cb;
             border-radius: 4px;
         }
+        .google-button {
+            display: inline-block;
+            padding: 0.5rem 1rem;  /* Espaciado interior */
+            margin-top: 10px;      /* Margen superior */
+            background-color: #db4437; /* Color de fondo de Google */
+            color: #ffffff;        /* Color del texto */
+            border: none;          /* Sin borde */
+            border-radius: 4px;   /* Bordes redondeados */
+            text-align: center;    /* Centrar texto */
+            text-decoration: none;  /* Sin subrayado */
+            cursor: pointer;       /* Cambiar cursor al pasar */
+            transition: background-color 0.3s; 
+        }
+
+        .google-button:hover {
+            background-color: #c13527; /* Color más oscuro al pasar el cursor */
+        }
     </style>
 </head>
 <body>
@@ -90,6 +107,7 @@
             <a href="{{ url_for('register') }}" style="color: #ffffff ;margin-bottom: 10px; text-decoration: none;">Dont have an account? Register</a>
             
             <input type="submit" value="Sign In">
+            <a class="google-button" href="{{ url_for('login_google') }}">Iniciar sesión con Google</a>
         </form>
     </div>
 </body>

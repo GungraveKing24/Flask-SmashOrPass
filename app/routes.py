@@ -1,12 +1,9 @@
 from flask import render_template, request, redirect, url_for, flash, session, jsonify
-from app import app, db
+from app import app, db, oauth
 from app.models import users, pokemon
+from authlib.integrations.flask_client import OAuth
 from werkzeug.security import generate_password_hash, check_password_hash
-import requests
-
-@app.before_request
-def log_session():
-    app.logger.info(f"Session Data: {session}")
+import os, secrets, string
 
 @app.route('/')
 def home():
@@ -67,6 +64,57 @@ def login():
             flash('Usuario o contraseña incorrectos')
             return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/login/google')
+def login_google():
+    nonce = os.urandom(16).hex()
+    session['nonce'] = nonce
+    redirect_uri = url_for('auth_callback_google', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+@app.route('/auth/callback/google')
+def auth_callback_google():
+    if 'error' in request.args:
+        error_message = request.args.get('error')
+        flash(f"Error de autenticación: {error_message}", "error")
+        return redirect(url_for('login'))
+
+    try:
+        token = oauth.google.authorize_access_token()  # Obtener el token de acceso
+        
+        # Cambia esta línea para obtener la información del usuario
+        user_info = oauth.google.get('https://www.googleapis.com/oauth2/v3/userinfo').json()  
+
+        print("User Info:", user_info)  # Imprimir la información del usuario para depuración
+
+        # Verifica si el nombre está disponible
+        if 'name' not in user_info:
+            flash("No se pudo obtener el nombre del usuario.", "error")
+            return redirect(url_for('login'))
+
+        # Resto del código para manejar el usuario...
+        user = users.query.filter_by(email=user_info['email']).first()
+
+        if not user:
+            random_password = generate_random_password()
+            new_user = users(name=user_info['name'], email=user_info['email'], password=random_password)  # Usa una contraseña aleatoria
+            db.session.add(new_user)
+            db.session.commit()
+            user = new_user
+
+        # Guardar en la sesión
+        session['user_id'] = user.id
+        session['user_name'] = user.name
+        return redirect(url_for('index'))
+
+    except Exception as e:
+        flash("Ocurrió un error al procesar el inicio de sesión", "error")
+        return redirect(url_for('login'))
+
+def generate_random_password(length=12):
+    """Genera una contraseña aleatoria de una longitud especificada."""
+    characters = string.ascii_letters + string.digits + string.punctuation
+    return ''.join(secrets.choice(characters) for _ in range(length))
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
